@@ -59,6 +59,8 @@
     <div id="htmlPane" class="viewer-pane" style="display:none;"></div>
     <div id="tablePane" class="viewer-pane" style="display:none;"></div>
     <div id="messagePane" class="viewer-pane" style="display:none;"></div>
+    <div id="imagePane" class="viewer-pane" style="display:none; text-align:center;">
+      <img id="imgPreview" style="max-width:100%; max-height:100%; border-radius:12px;" />
   </div>
 </div>
 
@@ -134,6 +136,9 @@ const btnUpload = document.getElementById('btnUpload');
 const btnClearAll = document.getElementById('btnClearAll');
 const fileList = document.getElementById('fileList');
 const storageInfo = document.getElementById('storageInfo');
+  const imagePane = document.getElementById('imagePane');   // ⭐ NEW
+const imgPreview = document.getElementById('imgPreview'); // ⭐ NEW
+
 
 const viewer = document.getElementById('viewer');
 const viewerTitle = document.getElementById('viewerTitle');
@@ -157,7 +162,7 @@ async function estimateUsage() {
 
 function iconFor(name) {
   const ext = name.split('.').pop().toLowerCase();
-  const map = { pdf:'📕', txt:'📝', doc:'📄', docx:'📄', xls:'📊', xlsx:'📊', ppt:'🖼️', pptx:'🖼️' };
+  const map = { pdf:'📕', txt:'📝', doc:'📄', docx:'📄', xls:'📊', xlsx:'📊', ppt:'🖼️', pptx:'🖼️' jpg:'🖼️', jpeg:'🖼️' };
   return map[ext] || '📁';
 }
 
@@ -223,6 +228,7 @@ async function previewFile(rec) {
   tablePane.style.display = 'none';
   messagePane.style.display = 'none';
   messagePane.innerHTML = '';
+  imagePane.style.display = 'none'; 
 
   const name = rec.name.toLowerCase();
   const blob = new Blob([rec.data], { type: rec.type || 'application/octet-stream' });
@@ -234,6 +240,13 @@ async function previewFile(rec) {
     return;
   }
 
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) {   // ⭐ NEW
+    const url = URL.createObjectURL(blob);                 // ⭐ NEW
+    imgPreview.src = url;                                  // ⭐ NEW
+    imagePane.style.display = 'block';                     // ⭐ NEW
+    return;                                                // ⭐ NEW
+  }                                                        // ⭐ NEW
+  
   if (name.endsWith('.txt')) {
     const text = await blob.text();
     htmlPane.innerHTML = `<pre style="white-space:pre-wrap">${escapeHtml(text)}</pre>`;
@@ -316,7 +329,9 @@ function guessType(name){
     xls:'application/vnd.ms-excel',
     doc:'application/msword',
     ppt:'application/vnd.ms-powerpoint',
-    pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    jpg:'image/jpeg',   // ⭐ NEW
+    jpeg:'image/jpeg'   // ⭐ NEW
   };
   return m[ext] || 'application/octet-stream';
 }
@@ -331,4 +346,5 @@ openDB().then(refreshList);
 </script>
 </body>
 </html>
+
 
